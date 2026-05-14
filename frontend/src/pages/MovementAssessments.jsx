@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal';
-import { getMovementAssessments, getMovementAssessment, createMovementAssessment, updateMovementAssessment, deleteMovementAssessment } from '../api';
+import { getMovementAssessments, getMovementAssessment, createMovementAssessment, updateMovementAssessment, deleteMovementAssessment, uploadAssessmentVideo, analyzeAssessmentVisual } from '../api';
 
 const emptyForm = {
   patientId: '', patientName: '', exerciseName: '', assessmentDate: '',
@@ -25,6 +25,10 @@ function MovementAssessments() {
   const [formData, setFormData] = useState({ ...emptyForm });
   const [editingId, setEditingId] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [visualAnalysis, setVisualAnalysis] = useState(null);
+  const [visualLoading, setVisualLoading] = useState(false);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -41,6 +45,33 @@ function MovementAssessments() {
     try { const res = await getMovementAssessment(item._id || item.id); setSelectedItem(res.data?.data || res.data); }
     catch { setSelectedItem(item); }
     setShowDetail(true);
+    setVisualAnalysis(null);
+  };
+
+  const handleUploadVideo = async () => {
+    if (!uploadFile || !selectedItem) return;
+    setUploadLoading(true);
+    try {
+      await uploadAssessmentVideo(selectedItem.id, uploadFile);
+      setSuccess('File uploaded successfully');
+      setUploadFile(null);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Upload failed');
+    }
+    setUploadLoading(false);
+  };
+
+  const handleAnalyzeVisual = async () => {
+    if (!selectedItem) return;
+    setVisualLoading(true);
+    setVisualAnalysis(null);
+    try {
+      const res = await analyzeAssessmentVisual(selectedItem.id);
+      setVisualAnalysis(res.data.visual_analysis);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Visual analysis failed');
+    }
+    setVisualLoading(false);
   };
 
   const handleAdd = () => { setFormData({ ...emptyForm }); setEditingId(null); setShowForm(true); };
@@ -141,6 +172,32 @@ function MovementAssessments() {
                   <div className="detail-field detail-full"><label>Findings</label><p>{selectedItem.findings || 'N/A'}</p></div>
                   <div className="detail-field detail-full"><label>Recommendations</label><p>{selectedItem.recommendations || 'N/A'}</p></div>
                 </div>
+                <div className="detail-field detail-full">
+                  <label>Upload Image/Video for Visual Analysis</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
+                    <input type="file" accept="video/*,image/*" onChange={e => setUploadFile(e.target.files[0])} style={{ color: '#94a3b8', fontSize: 13, flex: 1 }} />
+                    <button className="btn btn-secondary btn-sm" onClick={handleUploadVideo} disabled={uploadLoading || !uploadFile}>
+                      {uploadLoading ? 'Uploading...' : 'Upload'}
+                    </button>
+                    <button className="btn btn-ai btn-sm" onClick={handleAnalyzeVisual} disabled={visualLoading}>
+                      {visualLoading ? 'Analyzing...' : 'Analyze Image'}
+                    </button>
+                  </div>
+                  {selectedItem.video_url && <p style={{ color: '#059669', fontSize: 12, marginTop: 4 }}>File: {selectedItem.video_url}</p>}
+                </div>
+                {visualAnalysis && (
+                  <div className="detail-field detail-full">
+                    <label>Visual AI Analysis</label>
+                    <div style={{ background: '#1e293b', padding: 16, borderRadius: 8, marginTop: 8 }}>
+                      {Object.entries(visualAnalysis).map(([k, v]) => (
+                        <div key={k} style={{ marginBottom: 8 }}>
+                          <strong style={{ color: '#e2e8f0', fontSize: 13 }}>{k.replace(/_/g, ' ')}: </strong>
+                          <span style={{ color: '#94a3b8', fontSize: 13 }}>{Array.isArray(v) ? v.join(', ') : String(v)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="detail-actions">
                   <button className="btn btn-primary" onClick={() => handleEdit(selectedItem)}>Edit</button>
                   <button className="btn btn-danger" onClick={() => handleDelete(selectedItem)}>Delete</button>

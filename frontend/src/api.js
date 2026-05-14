@@ -151,5 +151,35 @@ export const aiGenerateHEP = (data) => api.post('/ai/generate-hep', data);
 export const aiGenerateSOAPNote = (data) => api.post('/ai/generate-soap-note', data);
 export const aiAnalyzePain = (data) => api.post('/ai/analyze-pain', data);
 export const aiPredictOutcomes = (data) => api.post('/ai/predict-outcomes', data);
+export const getAIHistory = (page = 1, limit = 20) => api.get(`/ai/history?page=${page}&limit=${limit}`);
+export const getAuditLogs = (page = 1, limit = 20) => api.get(`/ai/audit-logs?page=${page}&limit=${limit}`);
+
+// Outcome Measure Scoring
+export const scoreOutcomeMeasure = (data) => api.post('/outcome-measures/score', data);
+export const getOutcomeTrend = (patientId) => api.get(`/outcome-measures/patient/${patientId}/trend`);
+export const getOutcomeMeasureTemplates = () => api.get('/outcome-measures/templates');
+export const createOutcomeMeasureTemplate = (data) => api.post('/outcome-measures/templates', data);
+export const submitPatientAssessment = (data) => api.post('/outcome-measures/patient-assessment', data);
+
+// Paginated list endpoints
+export const getPatientsPaged = (page = 1, limit = 20) => api.get(`/patients?page=${page}&limit=${limit}`);
+export const getAppointmentsPaged = (page = 1, limit = 20) => api.get(`/appointments?page=${page}&limit=${limit}`);
+export const getTreatmentPlansPaged = (page = 1, limit = 20) => api.get(`/treatment-plans?page=${page}&limit=${limit}`);
+
+// New AI endpoints
+export const aiRomCalculator = (data) => api.post('/ai/rom-calculator', data);
+export const aiPrescribeExercises = (patientId) => api.post(`/patients/${patientId}/prescribe-exercises`, {});
+export const aiProgressReport = (patientId) => api.get(`/ai/progress-report/${patientId}`);
+
+// Video/Image upload
+export const uploadAssessmentVideo = (assessmentId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api.post(`/movement-assessments/${assessmentId}/upload-video`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+export const analyzeAssessmentVisual = (assessmentId) =>
+  api.post(`/movement-assessments/${assessmentId}/analyze-visual`);
 
 export default api;

@@ -2,14 +2,23 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// GET /api/treatment-plans
+// GET /api/treatment-plans?page=1&limit=20
 router.get('/', async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 20);
+    const offset = (page - 1) * limit;
+
+    const countResult = await pool.query('SELECT COUNT(*) FROM treatment_plans');
+    const total = parseInt(countResult.rows[0].count);
+
     const result = await pool.query(
       `SELECT tp.*, p.name as patient_name FROM treatment_plans tp
-       LEFT JOIN patients p ON tp.patient_id = p.id ORDER BY tp.created_at DESC`
+       LEFT JOIN patients p ON tp.patient_id = p.id
+       ORDER BY tp.created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
-    res.json(result.rows);
+    res.json({ data: result.rows, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     console.error('Error fetching treatment plans:', err);
     res.status(500).json({ error: 'Failed to fetch treatment plans.' });

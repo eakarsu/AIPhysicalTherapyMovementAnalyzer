@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal';
-import { getPatients, getPatient, createPatient, updatePatient, deletePatient } from '../api';
+import { getPatientsPaged, getPatient, createPatient, updatePatient, deletePatient } from '../api';
 
 const emptyForm = {
   firstName: '', lastName: '', email: '', phone: '', dateOfBirth: '',
@@ -25,12 +25,18 @@ function Patients() {
   const [formData, setFormData] = useState({ ...emptyForm });
   const [editingId, setEditingId] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 20;
 
-  const fetchItems = async () => {
+  const fetchItems = async (p = 1) => {
     setLoading(true);
     try {
-      const res = await getPatients();
-      setItems(Array.isArray(res.data) ? res.data : res.data?.data || []);
+      const res = await getPatientsPaged(p, limit);
+      const d = res.data;
+      setItems(Array.isArray(d) ? d : d?.data || []);
+      setPage(d?.page || 1);
+      setTotalPages(d?.totalPages || 1);
     } catch (err) {
       setError('Failed to load patients');
     } finally {
@@ -38,7 +44,7 @@ function Patients() {
     }
   };
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => { fetchItems(1); }, []);
 
   useEffect(() => {
     if (success) { const t = setTimeout(() => setSuccess(''), 3000); return () => clearTimeout(t); }
@@ -92,7 +98,7 @@ function Patients() {
       await deletePatient(item._id || item.id);
       setSuccess('Patient deleted successfully');
       setShowDetail(false);
-      fetchItems();
+      fetchItems(page);
     } catch {
       setError('Failed to delete patient');
     }
@@ -114,7 +120,7 @@ function Patients() {
         setSuccess('Patient created successfully');
       }
       setShowForm(false);
-      fetchItems();
+      fetchItems(page);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save patient');
     } finally {
@@ -174,6 +180,14 @@ function Patients() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+              <button className="btn btn-secondary" onClick={() => { const p = page - 1; setPage(p); fetchItems(p); }} disabled={page <= 1}>Prev</button>
+              <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px' }}>Page {page} of {totalPages}</span>
+              <button className="btn btn-secondary" onClick={() => { const p = page + 1; setPage(p); fetchItems(p); }} disabled={page >= totalPages}>Next</button>
             </div>
           )}
 
