@@ -78,6 +78,9 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// === Custom Views (Therapy Views) — mounted BEFORE any 404/catch-all ===
+app.use('/api/custom-views', require('./routes/customViews'));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

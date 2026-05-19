@@ -46,6 +46,7 @@ import GapNoIntegrationWithFitnessActivityTrackersPage from './pages/GapNoIntegr
 import GapNoNotificationsModuleGrep0Page from './pages/GapNoNotificationsModuleGrep0Page';
 import GapNoWebhooksForReferralEventsPage from './pages/GapNoWebhooksForReferralEventsPage';
 import GapLimitedMobileApp1MobileReferenceDespiteHepPage from './pages/GapLimitedMobileApp1MobileReferenceDespiteHepPage';
+import CustomViewsPage from './pages/CustomViewsPage';
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -86,6 +87,7 @@ function App() {
         <Route path="/progress-chart" element={<ProtectedRoute><ProgressChart /></ProtectedRoute>} />
         <Route path="/appointment-optimize" element={<ProtectedRoute><AppointmentOptimize /></ProtectedRoute>} />
         <Route path="/patient-dropout-predict" element={<ProtectedRoute><PatientDropoutPredict /></ProtectedRoute>} />
+        <Route path="/custom-views" element={<ProtectedRoute><CustomViewsPage /></ProtectedRoute>} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       

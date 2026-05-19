@@ -19,6 +19,7 @@ const navItems = [
   { path: '/messages', icon: '💬', label: 'Messages' },
   { path: '/waitlist', icon: '⏳', label: 'Waitlist' },
   { path: '/reports', icon: '📊', label: 'Reports' },
+  { path: '/custom-views', icon: '🧩', label: 'Therapy Views' },
   // === Batch 06 Gaps & Frontend Mounts ===
   { path: '/cf-agentic-hep-execution', label: 'Agentic HEP execution', icon: '✨' },
   { path: '/cf-movement-quality-scoring', label: 'Movement quality scoring', icon: '✨' },
