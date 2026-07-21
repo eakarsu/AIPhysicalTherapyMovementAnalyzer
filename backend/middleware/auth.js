@@ -2,11 +2,10 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
-if (!process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET environment variable is not set.');
-  process.exit(1);
+const JWT_SECRET = String(process.env.JWT_SECRET || '');
+if (JWT_SECRET.length < 32 || /replace|change|example|generate|secret-key-2024/i.test(JWT_SECRET)) {
+  throw new Error('JWT_SECRET must be a non-placeholder value of at least 32 characters.');
 }
-const JWT_SECRET = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];

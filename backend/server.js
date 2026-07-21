@@ -4,24 +4,22 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const { validateRuntime } = require('./governance/runtime');
+const { createProviderGate } = require('./governance/providerGate');
+const governanceRouter = require('./governance/router');
 
-// Fail hard if JWT_SECRET not set
-if (!process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET environment variable is not set. Exiting.');
-  process.exit(1);
-}
+validateRuntime();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true,
-}));
+const allowedOrigins = String(process.env.CORS_ORIGINS || process.env.CLIENT_URL || 'http://localhost:3000').split(',').map((value) => value.trim()).filter(Boolean);
+app.use(cors({ origin: (origin, callback) => !origin || allowedOrigins.includes(origin) ? callback(null, true) : callback(new Error('Origin not allowed by CORS')), credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(morgan('dev'));
+app.use(createProviderGate(['/api/ai', '/api/gap', '/api/cf']));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -72,6 +70,7 @@ app.use('/api/reports', authenticateToken, reportsRoutes);
 app.use('/api/waitlist', authenticateToken, waitlistRoutes);
 // Pass-5 backlog: NEEDS-CREDS integrations (EHR/wearables/claims/telehealth) and content library
 app.use('/api/integrations', authenticateToken, require('./routes/integrations'));
+app.use('/api/governed-movement-observations', governanceRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -79,7 +78,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // === Custom Views (Therapy Views) — mounted BEFORE any 404/catch-all ===
-app.use('/api/custom-views', require('./routes/customViews'));
+app.use('/api/custom-views', authenticateToken, require('./routes/customViews'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

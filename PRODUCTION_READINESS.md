@@ -1,0 +1,12 @@
+# Governed movement observation
+
+The durable path is `/api/governed-movement-observations`. A Bearer identity and active tenant membership are required; every write also requires `X-Tenant-Id` and `Idempotency-Key`. The state machine records consent, versioned observations/devices/calibration, missing-data and uncertainty review, clinician review, owned follow-up, escalation, and plan approval. Evidence contains opaque encrypted-storage references, source/model/policy versions, SHA-256 digests, timestamps, consent basis, and non-sensitive metadata—not raw sensitive payloads.
+
+The additive migration `backend/migrations/001_governed_movement_observation.sql` is an explicit operator action. Startup never creates, drops, seeds, synchronizes, or migrates a database. Apply it only through an approved migrator after backup, review, and rollback planning. It adds tenant memberships, optimistic case versions, immutable evidence/events, retention metadata, connector-failure receipts, and indexes without deleting legacy tables.
+
+The connector catalog is typed but intentionally unconfigured. Generated gap, custom-provider, and AI routes are quarantined by default; `ENABLE_LEGACY_PROVIDER_ROUTES` is forbidden in production and a credential alone cannot establish provider fitness. Connector attempts can record idempotent retryable failure receipts, but production adapters still require credentials, contract tests, webhook verification, retry/backoff, reconciliation, privacy/security review, and usage controls.
+
+The checked-in versioned acceptance fixture exercises complete and missing/unsafe inputs, deterministic metrics, stale data where applicable, RBAC, dual control, optimistic concurrency, tenant/idempotency boundaries, provider quarantine, runtime configuration, migration safety, and launcher safety. No clinical, EHR/FHIR, wearable, imaging, payer, bias, calibration, outcome, or professional validation was performed; the path never diagnoses or prescribes.
+
+Copy `.env.example` to a secret-managed `.env`, replace every placeholder, and keep all mock/bootstrap/legacy switches false. Run `node --test backend/governance/*.test.cjs`, syntax checks, and `bash -n start.sh`. The launcher starts only already-installed code, refuses occupied ports, and stops only its child processes; dependencies, database provisioning, migration, seeding, external systems, and real-world acceptance remain separate approved operations.
+

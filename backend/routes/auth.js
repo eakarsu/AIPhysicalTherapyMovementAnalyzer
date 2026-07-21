@@ -51,7 +51,7 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
@@ -67,7 +67,7 @@ router.post('/register', async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role',
-      [name, email, password_hash, role || 'therapist']
+      [name, email, password_hash, 'patient']
     );
 
     const user = result.rows[0];
