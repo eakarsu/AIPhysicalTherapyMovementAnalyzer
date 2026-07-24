@@ -5,6 +5,7 @@ const pool = require('../db');
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022';
+const OPENROUTER_BASE_URL = (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 
 async function callOpenRouter(messages) {
   const body = JSON.stringify({
@@ -14,7 +15,8 @@ async function callOpenRouter(messages) {
     max_tokens: 2000,
   });
 
-  const url = new URL('https://openrouter.ai/api/v1/chat/completions');
+  if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured');
+  const url = new URL(`${OPENROUTER_BASE_URL}/chat/completions`);
 
   return new Promise((resolve, reject) => {
     const req = https.request(
@@ -35,9 +37,14 @@ async function callOpenRouter(messages) {
         res.on('end', () => {
           try {
             const parsed = JSON.parse(data);
-            if (parsed.error) {
-              reject(new Error(parsed.error.message || 'OpenRouter API error'));
+            if (res.statusCode < 200 || res.statusCode >= 300 || parsed.error) {
+              reject(new Error(parsed.error?.message || `OpenRouter returned HTTP ${res.statusCode}`));
             } else {
+              const content = parsed.choices?.[0]?.message?.content;
+              if (typeof content !== 'string' || !content.trim()) {
+                reject(new Error('OpenRouter returned an empty response'));
+                return;
+              }
               resolve(parsed);
             }
           } catch (e) {

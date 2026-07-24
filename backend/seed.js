@@ -4,6 +4,12 @@ const bcrypt = require('bcryptjs');
 async function seed() {
   const client = await pool.connect();
   try {
+    if (process.env.ALLOW_DESTRUCTIVE_SEED !== 'true') {
+      throw new Error('set ALLOW_DESTRUCTIVE_SEED=true to run the destructive demo seed explicitly');
+    }
+    const seedEmail = process.env.SEED_ADMIN_EMAIL;
+    const seedPassword = process.env.SEED_ADMIN_PASSWORD;
+    if (!seedEmail || !seedPassword) throw new Error('SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD are required');
     console.log('Dropping existing tables...');
     await client.query(`
       DROP TABLE IF EXISTS waitlist CASCADE;
@@ -204,14 +210,14 @@ async function seed() {
 
     // Seed users
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash('password123', salt);
+    const passwordHash = await bcrypt.hash(seedPassword, salt);
     await client.query(`
       INSERT INTO users (name, email, password_hash, role) VALUES
-      ('Admin User', 'admin@ptclinic.com', $1, 'admin'),
+      ('Runtime Admin', $2, $1, 'admin'),
       ('Dr. Sarah Mitchell', 'sarah.mitchell@ptclinic.com', $1, 'therapist'),
       ('Dr. James Rodriguez', 'james.rodriguez@ptclinic.com', $1, 'therapist'),
       ('Dr. Emily Chen', 'emily.chen@ptclinic.com', $1, 'therapist')
-    `, [passwordHash]);
+    `, [passwordHash, seedEmail]);
     console.log('Users seeded.');
 
     // Seed patients (16)
@@ -866,7 +872,7 @@ async function seed() {
     console.log('Waitlist seeded.');
 
     console.log('\nSeeding complete! All tables populated with realistic data.');
-    console.log('Demo user: admin@ptclinic.com / password123');
+    console.log(`Seed admin created for ${seedEmail}`);
 
   } catch (err) {
     console.error('Seeding error:', err);

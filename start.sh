@@ -2,8 +2,16 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ ! -f "$PROJECT_DIR/.env" ]]; then
+  echo "Missing required file: $PROJECT_DIR/.env" >&2
+  exit 1
+fi
+set -a
+source "$PROJECT_DIR/.env"
+set +a
 BACKEND_PORT="${BACKEND_PORT:-${SERVER_PORT:-3001}}"
 FRONTEND_PORT="${FRONTEND_PORT:-${CLIENT_PORT:-3000}}"
+export API_TARGET="http://127.0.0.1:$BACKEND_PORT"
 CHILD_PIDS=()
 
 require_file() { [ -f "$1" ] || { echo "Missing required file: $1" >&2; exit 1; }; }
@@ -21,7 +29,6 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-require_file "$PROJECT_DIR/.env"
 require_dir "$PROJECT_DIR/backend/node_modules"
 require_dir "$PROJECT_DIR/frontend/node_modules"
 port_free "$BACKEND_PORT"
