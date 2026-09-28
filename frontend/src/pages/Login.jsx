@@ -72,7 +72,7 @@ function Login() {
               {loading ? <span className="spinner"></span> : 'Sign In'}
             </button>
             <button type="button" className="btn btn-secondary btn-block" onClick={handleAutoFill}>
-              Auto-Fill Demo Credentials
+              Auto Fill Demo Credentials
             </button>
           </form>
         </div>
