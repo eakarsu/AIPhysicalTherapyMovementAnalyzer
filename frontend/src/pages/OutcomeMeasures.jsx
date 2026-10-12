@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -48,7 +49,7 @@ function OutcomeMeasures() {
     try {
       const [omRes, patRes, tplRes] = await Promise.all([getOutcomeMeasures(), getPatients(), getOutcomeMeasureTemplates()]);
       setItems(Array.isArray(omRes.data) ? omRes.data : []);
-      setPatients(Array.isArray(patRes.data) ? patRes.data : []);
+      setPatients(listRows(patRes.data));
       setTemplates(Array.isArray(tplRes.data) ? tplRes.data : []);
     } catch { setError('Failed to load outcome measures'); }
     finally { setLoading(false); }

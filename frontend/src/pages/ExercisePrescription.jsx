@@ -1,6 +1,7 @@
+import { listRows } from '../listRows';
 import React,{useState,useEffect}from'react';import Header from'../components/Header';import Sidebar from'../components/Sidebar';import{getPatients,aiPrescribeExercises}from'../api';
 export default function ExercisePrescription(){const[sidebarOpen,setSidebarOpen]=useState(true);const[patients,setPatients]=useState([]);const[sel,setSel]=useState('');const[loading,setLoading]=useState(false);const[result,setResult]=useState(null);const[error,setError]=useState('');
-useEffect(()=>{getPatients().then(r=>{const d=r.data;setPatients(Array.isArray(d)?d:d?.data||[]);}).catch(()=>{});},[]);
+useEffect(()=>{getPatients().then(r=>{const d=r.data;setPatients(listRows(d));}).catch(()=>{});},[]);
 const go=async(e)=>{e.preventDefault();if(!sel){setError('Select patient');return;}setLoading(true);setError('');setResult(null);try{const r=await aiPrescribeExercises(sel);setResult(r.data.exercise_prescription);}catch(err){setError(err.response?.data?.error||'Failed');}setLoading(false);};
 const catColor={strength:'#dc2626',flexibility:'#059669',balance:'#d97706',endurance:'#2563eb',neuromuscular:'#7c3aed'};
 return(<div className="app-layout"><Sidebar isOpen={sidebarOpen} onToggle={()=>setSidebarOpen(!sidebarOpen)}/><div className={`main-content ${sidebarOpen?'':'main-content-expanded'}`}><Header onToggleSidebar={()=>setSidebarOpen(!sidebarOpen)}/><div className="page-content">

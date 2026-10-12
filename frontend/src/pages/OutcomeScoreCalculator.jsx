@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -70,7 +71,7 @@ function OutcomeScoreCalculator() {
   useEffect(() => {
     getPatients().then(r => {
       const d = r.data;
-      setPatients(Array.isArray(d) ? d : d?.data || []);
+      setPatients(listRows(d));
     }).catch(() => {});
   }, []);
 

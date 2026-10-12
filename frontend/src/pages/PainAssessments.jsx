@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -31,7 +32,7 @@ function PainAssessments() {
     try {
       const [paRes, patRes] = await Promise.all([getPainAssessments(), getPatients()]);
       setItems(Array.isArray(paRes.data) ? paRes.data : []);
-      setPatients(Array.isArray(patRes.data) ? patRes.data : []);
+      setPatients(listRows(patRes.data));
     } catch { setError('Failed to load pain assessments'); }
     finally { setLoading(false); }
   };

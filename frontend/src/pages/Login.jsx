@@ -10,8 +10,15 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleAutoFill = () => {
-    setEmail(import.meta.env.VITE_DEMO_EMAIL || '');
-    setPassword(import.meta.env.VITE_DEMO_PASSWORD || '');
+    const demoEmail = import.meta.env.VITE_DEMO_EMAIL;
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD;
+    if (import.meta.env.VITE_ENABLE_DEMO_CREDENTIAL_AUTOFILL !== 'true' || !demoEmail || !demoPassword) {
+      setError('Demo credentials are not configured for this app session.');
+      return;
+    }
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -72,7 +79,7 @@ function Login() {
               {loading ? <span className="spinner"></span> : 'Sign In'}
             </button>
             <button type="button" className="btn btn-secondary btn-block" onClick={handleAutoFill}>
-              Auto Fill Demo Credentials
+              Fill Demo Credentials
             </button>
           </form>
         </div>

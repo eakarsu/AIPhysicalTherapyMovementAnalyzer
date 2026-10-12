@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -30,7 +31,7 @@ function Messages() {
     try {
       const [msgRes, patRes] = await Promise.all([getMessages(), getPatients()]);
       setItems(Array.isArray(msgRes.data) ? msgRes.data : []);
-      setPatients(Array.isArray(patRes.data) ? patRes.data : []);
+      setPatients(listRows(patRes.data));
     } catch { setError('Failed to load messages'); }
     finally { setLoading(false); }
   };

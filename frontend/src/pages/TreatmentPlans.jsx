@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -27,7 +28,7 @@ function TreatmentPlans() {
 
   const fetchItems = async () => {
     setLoading(true);
-    try { const res = await getTreatmentPlans(); setItems(Array.isArray(res.data) ? res.data : res.data?.data || []); }
+    try { const res = await getTreatmentPlans(); setItems(listRows(res.data)); }
     catch { setError('Failed to load treatment plans'); }
     finally { setLoading(false); }
   };

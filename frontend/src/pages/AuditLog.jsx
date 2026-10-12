@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -20,7 +21,7 @@ function AuditLog() {
     try {
       const res = await getAuditLogs(p, limit);
       const d = res.data;
-      setItems(d.data || []);
+      setItems(listRows(d));
       setPage(d.page || 1);
       setTotalPages(d.totalPages || 1);
       setTotal(d.total || 0);

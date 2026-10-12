@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -30,7 +31,7 @@ function Waitlist() {
     try {
       const [waitlistRes, patientsRes] = await Promise.all([getWaitlist(), getPatients()]);
       setItems(Array.isArray(waitlistRes.data) ? waitlistRes.data : []);
-      setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+      setPatients(listRows(patientsRes.data));
     } catch { setError('Failed to load waitlist'); }
     finally { setLoading(false); }
   };

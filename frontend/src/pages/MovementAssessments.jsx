@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -32,7 +33,7 @@ function MovementAssessments() {
 
   const fetchItems = async () => {
     setLoading(true);
-    try { const res = await getMovementAssessments(); setItems(Array.isArray(res.data) ? res.data : res.data?.data || []); }
+    try { const res = await getMovementAssessments(); setItems(listRows(res.data)); }
     catch { setError('Failed to load assessments'); }
     finally { setLoading(false); }
   };

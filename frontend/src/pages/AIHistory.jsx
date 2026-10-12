@@ -1,8 +1,10 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import { getAIHistory } from '../api';
+import AIResponseDisplay from '../components/AIResponseDisplay';
 
 function AIHistory() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ function AIHistory() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [selected, setSelected] = useState(null);
   const limit = 20;
 
   const fetchHistory = async (p = 1) => {
@@ -20,7 +23,7 @@ function AIHistory() {
     try {
       const res = await getAIHistory(p, limit);
       const d = res.data;
-      setItems(d.data || []);
+      setItems(listRows(d));
       setPage(d.page || 1);
       setTotalPages(d.totalPages || 1);
       setTotal(d.total || 0);
@@ -73,15 +76,18 @@ function AIHistory() {
                         <td>{item.id}</td>
                         <td><span className="status-badge badge-info">{item.endpoint}</span></td>
                         <td>{item.patient_id || '—'}</td>
-                        <td style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {item.result ? JSON.stringify(item.result).substring(0, 100) + '...' : '—'}
-                        </td>
+                        <td><button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelected(item)}>View report</button></td>
                         <td>{item.created_at ? new Date(item.created_at).toLocaleString() : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {selected && <section className="card" aria-label="Saved AI analysis report" style={{ marginTop: 24 }}>
+                <div className="card-header"><h3>Saved analysis · {selected.endpoint}</h3><button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelected(null)}>Close</button></div>
+                <div className="card-body"><AIResponseDisplay response={selected.result} /></div>
+              </section>}
 
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>

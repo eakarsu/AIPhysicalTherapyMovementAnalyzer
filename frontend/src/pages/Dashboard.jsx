@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -47,7 +48,7 @@ function Dashboard() {
         results.forEach((result, i) => {
           if (result.status === 'fulfilled') {
             const data = result.value.data;
-            newCounts[keys[i]] = Array.isArray(data) ? data.length : 0;
+            newCounts[keys[i]] = listRows(data).length;
           } else {
             newCounts[keys[i]] = 0;
           }

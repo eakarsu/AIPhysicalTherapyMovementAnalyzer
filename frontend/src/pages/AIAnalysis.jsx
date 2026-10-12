@@ -4,13 +4,14 @@ import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal';
 import AIResponseDisplay from '../components/AIResponseDisplay';
+import { analysisPresets } from './aiAnalysisPresets';
 import {
   aiAnalyzeMovement, aiGenerateTreatmentPlan, aiAssessRecovery,
   aiRecommendExercises, aiGenerateHEP, aiGenerateSOAPNote,
   aiAnalyzePain, aiPredictOutcomes,
 } from '../api';
 
-const aiFeatures = [
+export const aiFeatures = [
   {
     id: 'analyze-movement',
     icon: '🎯',
@@ -177,6 +178,11 @@ function AIAnalysis() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const fillPreset = (values) => {
+    setFormData((current) => ({ ...current, ...values }));
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!activeFeature) return;
@@ -206,7 +212,7 @@ function AIAnalysis() {
   const renderField = (field) => {
     const commonProps = {
       name: field.name,
-      value: formData[field.name] || '',
+      value: formData[field.name] ?? '',
       onChange: handleChange,
       required: field.required,
       placeholder: field.placeholder || '',
@@ -279,6 +285,12 @@ function AIAnalysis() {
                 {!aiResponse && (
                   <form onSubmit={handleSubmit} className="modal-form">
                     {error && <div className="alert alert-error">{error}</div>}
+                    <div className="form-actions" aria-label="Example inputs">
+                      {analysisPresets(activeFeature).map((preset) => (
+                        <button key={preset.label} type="button" className="btn btn-secondary" disabled={aiLoading} onClick={() => fillPreset(preset.values)}>{preset.label}</button>
+                      ))}
+                    </div>
+                    <p>Fictional examples fill every field. Review clinical details before running analysis.</p>
                     <div className="form-grid">
                       {activeFeature.fields.map((field) => (
                         <div key={field.name} className={`form-group ${field.type === 'textarea' ? 'form-full' : ''}`}>

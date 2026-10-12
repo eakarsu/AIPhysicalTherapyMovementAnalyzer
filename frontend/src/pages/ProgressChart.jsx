@@ -1,6 +1,7 @@
+import { listRows } from '../listRows';
 import React,{useState,useEffect}from'react';import Header from'../components/Header';import Sidebar from'../components/Sidebar';import{getPatients,aiProgressReport}from'../api';
 export default function ProgressChart(){const[sidebarOpen,setSidebarOpen]=useState(true);const[patients,setPatients]=useState([]);const[sel,setSel]=useState('');const[loading,setLoading]=useState(false);const[result,setResult]=useState(null);const[error,setError]=useState('');
-useEffect(()=>{getPatients().then(r=>{const d=r.data;setPatients(Array.isArray(d)?d:d?.data||[]);}).catch(()=>{});},[]);
+useEffect(()=>{getPatients().then(r=>{const d=r.data;setPatients(listRows(d));}).catch(()=>{});},[]);
 const go=async()=>{if(!sel){setError('Select patient');return;}setLoading(true);setError('');setResult(null);try{const r=await aiProgressReport(sel);setResult(r.data);}catch(e){setError(e.response?.data?.error||'Failed');}setLoading(false);};
 const prog=result?.progress_data?.recovery_progress||[];const asm=result?.progress_data?.movement_assessments||[];const rp=result?.ai_report;
 return(<div className="app-layout"><Sidebar isOpen={sidebarOpen} onToggle={()=>setSidebarOpen(!sidebarOpen)}/><div className={`main-content ${sidebarOpen?'':'main-content-expanded'}`}><Header onToggleSidebar={()=>setSidebarOpen(!sidebarOpen)}/><div className="page-content">

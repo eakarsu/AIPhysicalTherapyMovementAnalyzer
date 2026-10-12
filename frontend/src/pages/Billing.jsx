@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -31,7 +32,7 @@ function Billing() {
     try {
       const [billRes, patRes] = await Promise.all([getBilling(), getPatients()]);
       setItems(Array.isArray(billRes.data) ? billRes.data : []);
-      setPatients(Array.isArray(patRes.data) ? patRes.data : []);
+      setPatients(listRows(patRes.data));
     } catch { setError('Failed to load billing records'); }
     finally { setLoading(false); }
   };

@@ -1,3 +1,4 @@
+import { listRows } from '../listRows';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -29,7 +30,7 @@ function Exercises() {
     setLoading(true);
     try {
       const res = await getExercises();
-      setItems(Array.isArray(res.data) ? res.data : res.data?.data || []);
+      setItems(listRows(res.data));
     } catch { setError('Failed to load exercises'); }
     finally { setLoading(false); }
   };

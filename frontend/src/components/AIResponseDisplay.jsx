@@ -1,13 +1,14 @@
 import React from 'react';
 
 function AIResponseDisplay({ response }) {
-  if (!response) return null;
+  if (response === null || response === undefined) return null;
 
   const renderValue = (value, depth = 0) => {
     if (value === null || value === undefined) return <span className="ai-value-null">N/A</span>;
     if (typeof value === 'boolean') return <span className={`ai-badge ${value ? 'badge-success' : 'badge-danger'}`}>{value ? 'Yes' : 'No'}</span>;
     if (typeof value === 'number') return <span className="ai-value-number">{value}</span>;
     if (typeof value === 'string') {
+      if (value === '') return <span className="ai-value-null">Empty string</span>;
       if (value.toLowerCase().includes('high') || value.toLowerCase().includes('severe')) {
         return <span className="ai-badge badge-danger">{value}</span>;
       }
@@ -20,11 +21,16 @@ function AIResponseDisplay({ response }) {
       return <span className="ai-value-string">{value}</span>;
     }
     if (Array.isArray(value)) {
+      if (value.length === 0) return <span className="ai-value-null">Empty list</span>;
+      if (value.length > 1 && value.every((item) => item && typeof item === 'object' && !Array.isArray(item))) {
+        const columns = [...new Set(value.flatMap((item) => Object.keys(item)))];
+        return <div className="table-container"><table className="data-table"><thead><tr>{columns.map((column) => <th key={column}>{formatKey(column)}</th>)}</tr></thead><tbody>{value.map((item, index) => <tr key={index}>{columns.map((column) => <td key={column}>{renderValue(item[column], depth + 1)}</td>)}</tr>)}</tbody></table></div>;
+      }
       return (
         <div className="ai-array">
           {value.map((item, i) => (
             <div key={i} className="ai-array-item">
-              {typeof item === 'object' ? renderObject(item, depth + 1) : (
+              {item !== null && typeof item === 'object' ? renderObject(item, depth + 1) : (
                 <span className="ai-list-item">
                   <span className="ai-list-bullet">&#9679;</span> {renderValue(item, depth + 1)}
                 </span>
@@ -166,7 +172,7 @@ function AIResponseDisplay({ response }) {
     }
   }
 
-  if (data && data.data) {
+  if (data && typeof data === 'object' && Object.hasOwn(data, 'data')) {
     data = data.data;
   }
 
@@ -176,7 +182,7 @@ function AIResponseDisplay({ response }) {
         <span className="ai-response-icon">🤖</span>
         <h3>AI Analysis Results</h3>
       </div>
-      {renderObject(data)}
+      {data !== null && typeof data === 'object' && !Array.isArray(data) ? renderObject(data) : renderValue(data)}
     </div>
   );
 }

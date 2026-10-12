@@ -1,3 +1,4 @@
+import AIReportLibrary from "./AIReportLibrary";
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -112,7 +113,7 @@ function Sidebar({ isOpen, onToggle }) {
       <button className="sidebar-collapse-btn" onClick={onToggle}>
         {isOpen ? '◀' : '▶'}
       </button>
-    </aside>
+    <AIReportLibrary /></aside>
   );
 }
 
