@@ -68,6 +68,7 @@ app.use('/api/pain-assessments', authenticateToken, painAssessmentsRoutes);
 app.use('/api/outcome-measures', authenticateToken, outcomeMeasuresRoutes);
 app.use('/api/reports', authenticateToken, reportsRoutes);
 app.use('/api/waitlist', authenticateToken, waitlistRoutes);
+app.use('/api/wave42', require('./routes/wave42'));
 // Pass-5 backlog: NEEDS-CREDS integrations (EHR/wearables/claims/telehealth) and content library
 app.use('/api/integrations', authenticateToken, require('./routes/integrations'));
 app.use('/api/governed-movement-observations', governanceRouter);
